@@ -1,36 +1,38 @@
 from __future__ import division
-from textwrap import dedent
-import colorsys
-import numpy as np
-from scipy import stats
-import pandas as pd
-import matplotlib as mpl
-from matplotlib.collections import PatchCollection
-import matplotlib.patches as Patches
-import matplotlib.pyplot as plt
-import matplotlib.collections as clt
+
 import warnings
 
+import numpy as np
+from scipy import stats
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import seaborn as sns
-
-from seaborn.external.six import string_types
-from seaborn.external.six.moves import range
-
-from seaborn import utils
-from seaborn.utils import iqr, categorical_order, remove_na
-from seaborn.algorithms import bootstrap
-from seaborn.palettes import color_palette, husl_palette, light_palette, dark_palette
-from seaborn.axisgrid import FacetGrid, _facet_docs
+from seaborn.utils import iqr, remove_na
 from seaborn.categorical import *
-from seaborn.categorical import _CategoricalPlotter, _CategoricalScatterPlotter,  _categorical_docs
+from seaborn.categorical import _CategoricalPlotter, _CategoricalScatterPlotter
 
-__all__ = [ "half_violinplot", "stripplot", "RainCloud"]
+__all__ = ["half_violinplot", "stripplot", "RainCloud"]
 
 
 class _StripPlotter(_CategoricalScatterPlotter):
     """1-d scatterplot with categorical organization."""
-    def __init__(self, x, y, hue, data, order, hue_order,
-                 jitter, dodge, orient, color, palette, width, move):
+
+    def __init__(
+        self,
+        x,
+        y,
+        hue,
+        data,
+        order,
+        hue_order,
+        jitter,
+        dodge,
+        orient,
+        color,
+        palette,
+        width,
+        move,
+    ):
         """Initialize the plotter."""
         self.establish_variables(x, y, hue, data, orient, order, hue_order)
         self.establish_colors(color, palette, 1)
@@ -56,10 +58,12 @@ class _StripPlotter(_CategoricalScatterPlotter):
             if self.plot_hues is None or not self.dodge:
 
                 if self.hue_names is None:
-                    hue_mask =  np.ones(group_data.size, np.bool)
+                    hue_mask = np.ones(group_data.size, np.bool)
                 else:
-                    hue_mask =  np.array([h in self.hue_names
-                                         for h in self.plot_hues[i]], np.bool)
+                    hue_mask = np.array(
+                        [h in self.hue_names for h in self.plot_hues[i]],
+                        np.bool,
+                    )
                     # Broken on older numpys
                     # hue_mask = np.in1d(self.plot_hues[i], self.hue_names)
 
@@ -100,11 +104,30 @@ class _StripPlotter(_CategoricalScatterPlotter):
 
 
 class _Half_ViolinPlotter(_CategoricalPlotter):
-
-    def __init__(self, x, y, hue, data, order, hue_order,
-                 bw, cut, scale, scale_hue, gridsize,
-                 width, inner, split, dodge, orient, linewidth,
-                 color, palette, saturation, offset):
+    def __init__(
+        self,
+        x,
+        y,
+        hue,
+        data,
+        order,
+        hue_order,
+        bw,
+        cut,
+        scale,
+        scale_hue,
+        gridsize,
+        width,
+        inner,
+        split,
+        dodge,
+        orient,
+        linewidth,
+        color,
+        palette,
+        saturation,
+        offset,
+    ):
 
         self.establish_variables(x, y, hue, data, orient, order, hue_order)
         self.establish_colors(color, palette, saturation)
@@ -116,10 +139,14 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
         self.offset = offset
 
         if inner is not None:
-            if not any([inner.startswith("quart"),
-                        inner.startswith("box"),
-                        inner.startswith("stick"),
-                        inner.startswith("point")]):
+            if not any(
+                [
+                    inner.startswith("quart"),
+                    inner.startswith("box"),
+                    inner.startswith("stick"),
+                    inner.startswith("point"),
+                ]
+            ):
                 err = "Inner style '{}' not recognized".format(inner)
                 raise ValueError(err)
         self.inner = inner
@@ -227,8 +254,9 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
                     kde, bw_used = self.fit_kde(kde_data, bw)
 
                     # Determine the support grid and get the density over it
-                    support_ij = self.kde_support(kde_data, bw_used,
-                                                  cut, gridsize)
+                    support_ij = self.kde_support(
+                        kde_data, bw_used, cut, gridsize
+                    )
                     density_ij = kde.evaluate(support_ij)
 
                     # Update the data structures with these results
@@ -266,8 +294,10 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
         except TypeError:
             kde = stats.gaussian_kde(x)
             if bw != "scott":  # scipy default
-                msg = ("Ignoring bandwidth choice, "
-                       "please upgrade scipy to use a different bandwidth.")
+                msg = (
+                    "Ignoring bandwidth choice, "
+                    "please upgrade scipy to use a different bandwidth."
+                )
                 warnings.warn(msg, UserWarning)
 
         # Extract the numeric bandwidth from the KDE object
@@ -377,11 +407,13 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
 
                 # Draw the violin for this group
                 grid = np.ones(self.gridsize) * i
-                fill_func(support,
-                          -self.offset + grid - density * self.dwidth,
-                          -self.offset + grid,
-                          facecolor=self.colors[i],
-                          **kws)
+                fill_func(
+                    support,
+                    -self.offset + grid - density * self.dwidth,
+                    -self.offset + grid,
+                    facecolor=self.colors[i],
+                    **kws
+                )
 
                 # Draw the interior representation of the data
                 if self.inner is None:
@@ -441,15 +473,19 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
 
                         grid = np.ones(self.gridsize) * i
                         if j:
-                            fill_func(support,
-                                      -self.offset + grid - density * self.dwidth,
-                                      -self.offset + grid,
-                                      **kws)
+                            fill_func(
+                                support,
+                                -self.offset + grid - density * self.dwidth,
+                                -self.offset + grid,
+                                **kws
+                            )
                         else:
-                            fill_func(support,
-                                      -self.offset + grid - density * self.dwidth,
-                                      -self.offset + grid,
-                                      **kws)
+                            fill_func(
+                                support,
+                                -self.offset + grid - density * self.dwidth,
+                                -self.offset + grid,
+                                **kws
+                            )
 
                         # Draw the interior representation of the data
                         if self.inner is None:
@@ -461,15 +497,25 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
 
                         # Draw quartile lines
                         if self.inner.startswith("quart"):
-                            self.draw_quartiles(ax, violin_data,
-                                                support, density, i,
-                                                ["left", "right"][j])
+                            self.draw_quartiles(
+                                ax,
+                                violin_data,
+                                support,
+                                density,
+                                i,
+                                ["left", "right"][j],
+                            )
 
                         # Draw stick observations
                         elif self.inner.startswith("stick"):
-                            self.draw_stick_lines(ax, violin_data,
-                                                  support, density, i,
-                                                  ["left", "right"][j])
+                            self.draw_stick_lines(
+                                ax,
+                                violin_data,
+                                support,
+                                density,
+                                i,
+                                ["left", "right"][j],
+                            )
 
                         # The box and point interior plots are drawn for
                         # all data at the group level, so we just do that once
@@ -481,8 +527,9 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
 
                         # Draw box and whisker information
                         if self.inner.startswith("box"):
-                            self.draw_box_lines(ax, violin_data,
-                                                support, density, i)
+                            self.draw_box_lines(
+                                ax, violin_data, support, density, i
+                            )
 
                         # Draw point observations
                         elif self.inner.startswith("point"):
@@ -493,10 +540,12 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
 
                     else:
                         grid = np.ones(self.gridsize) * (i + offsets[j])
-                        fill_func(support,
-                                  -self.offset + grid - density * self.dwidth,
-                                  -self.offset + grid,
-                                  **kws)
+                        fill_func(
+                            support,
+                            -self.offset + grid - density * self.dwidth,
+                            -self.offset + grid,
+                            **kws
+                        )
 
                         # Draw the interior representation
                         if self.inner is None:
@@ -508,21 +557,33 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
 
                         # Draw box and whisker information
                         if self.inner.startswith("box"):
-                            self.draw_box_lines(ax, violin_data,
-                                                support, density,
-                                                i + offsets[j])
+                            self.draw_box_lines(
+                                ax,
+                                violin_data,
+                                support,
+                                density,
+                                i + offsets[j],
+                            )
 
                         # Draw quartile lines
                         elif self.inner.startswith("quart"):
-                            self.draw_quartiles(ax, violin_data,
-                                                support, density,
-                                                i + offsets[j])
+                            self.draw_quartiles(
+                                ax,
+                                violin_data,
+                                support,
+                                density,
+                                i + offsets[j],
+                            )
 
                         # Draw stick observations
                         elif self.inner.startswith("stick"):
-                            self.draw_stick_lines(ax, violin_data,
-                                                  support, density,
-                                                  i + offsets[j])
+                            self.draw_stick_lines(
+                                ax,
+                                violin_data,
+                                support,
+                                density,
+                                i + offsets[j],
+                            )
 
                         # Draw point observations
                         elif self.inner.startswith("point"):
@@ -532,15 +593,19 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
         """Draw a line to mark a single observation."""
         d_width = density * self.dwidth
         if self.orient == "v":
-            ax.plot([at_group - d_width, at_group + d_width],
-                    [at_quant, at_quant],
-                    color=self.gray,
-                    linewidth=self.linewidth)
+            ax.plot(
+                [at_group - d_width, at_group + d_width],
+                [at_quant, at_quant],
+                color=self.gray,
+                linewidth=self.linewidth,
+            )
         else:
-            ax.plot([at_quant, at_quant],
-                    [at_group - d_width, at_group + d_width],
-                    color=self.gray,
-                    linewidth=self.linewidth)
+            ax.plot(
+                [at_quant, at_quant],
+                [at_group - d_width, at_group + d_width],
+                color=self.gray,
+                linewidth=self.linewidth,
+            )
 
     def draw_box_lines(self, ax, data, support, density, center):
         """Draw boxplot information at center of the density."""
@@ -552,49 +617,90 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
 
         # Draw a boxplot using lines and a point
         if self.orient == "v":
-            ax.plot([center, center], [h1, h2],
-                    linewidth=self.linewidth,
-                    color=self.gray)
-            ax.plot([center, center], [q25, q75],
-                    linewidth=self.linewidth * 3,
-                    color=self.gray)
-            ax.scatter(center, q50,
-                       zorder=3,
-                       color="white",
-                       edgecolor=self.gray,
-                       s=np.square(self.linewidth * 2))
+            ax.plot(
+                [center, center],
+                [h1, h2],
+                linewidth=self.linewidth,
+                color=self.gray,
+            )
+            ax.plot(
+                [center, center],
+                [q25, q75],
+                linewidth=self.linewidth * 3,
+                color=self.gray,
+            )
+            ax.scatter(
+                center,
+                q50,
+                zorder=3,
+                color="white",
+                edgecolor=self.gray,
+                s=np.square(self.linewidth * 2),
+            )
         else:
-            ax.plot([h1, h2], [center, center],
-                    linewidth=self.linewidth,
-                    color=self.gray)
-            ax.plot([q25, q75], [center, center],
-                    linewidth=self.linewidth * 3,
-                    color=self.gray)
-            ax.scatter(q50, center,
-                       zorder=3,
-                       color="white",
-                       edgecolor=self.gray,
-                       s=np.square(self.linewidth * 2))
+            ax.plot(
+                [h1, h2],
+                [center, center],
+                linewidth=self.linewidth,
+                color=self.gray,
+            )
+            ax.plot(
+                [q25, q75],
+                [center, center],
+                linewidth=self.linewidth * 3,
+                color=self.gray,
+            )
+            ax.scatter(
+                q50,
+                center,
+                zorder=3,
+                color="white",
+                edgecolor=self.gray,
+                s=np.square(self.linewidth * 2),
+            )
 
     def draw_quartiles(self, ax, data, support, density, center, split=False):
         """Draw the quartiles as lines at width of density."""
         q25, q50, q75 = np.percentile(data, [25, 50, 75])
 
-        self.draw_to_density(ax, center, q25, support, density, split,
-                             linewidth=self.linewidth,
-                             dashes=[self.linewidth * 1.5] * 2)
-        self.draw_to_density(ax, center, q50, support, density, split,
-                             linewidth=self.linewidth,
-                             dashes=[self.linewidth * 3] * 2)
-        self.draw_to_density(ax, center, q75, support, density, split,
-                             linewidth=self.linewidth,
-                             dashes=[self.linewidth * 1.5] * 2)
+        self.draw_to_density(
+            ax,
+            center,
+            q25,
+            support,
+            density,
+            split,
+            linewidth=self.linewidth,
+            dashes=[self.linewidth * 1.5] * 2,
+        )
+        self.draw_to_density(
+            ax,
+            center,
+            q50,
+            support,
+            density,
+            split,
+            linewidth=self.linewidth,
+            dashes=[self.linewidth * 3] * 2,
+        )
+        self.draw_to_density(
+            ax,
+            center,
+            q75,
+            support,
+            density,
+            split,
+            linewidth=self.linewidth,
+            dashes=[self.linewidth * 1.5] * 2,
+        )
 
     def draw_points(self, ax, data, center):
         """Draw individual observations as points at middle of the violin."""
-        kws = dict(s=np.square(self.linewidth * 2),
-                   color=self.gray,
-                   edgecolor=self.gray)
+        kws = dict(
+            s=np.square(self.linewidth * 2),
+            color=self.gray,
+            edgecolor=self.gray,
+        )
 
         grid = np.ones(len(data)) * center
 
@@ -603,12 +709,18 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
         else:
             ax.scatter(data, grid, **kws)
 
-    def draw_stick_lines(self, ax, data, support, density,
-                         center, split=False):
+    def draw_stick_lines(self, ax, data, support, density, center, split=False):
         """Draw individual observations as sticks at width of density."""
         for val in data:
-            self.draw_to_density(ax, center, val, support, density, split,
-                                 linewidth=self.linewidth * .5)
+            self.draw_to_density(
+                ax,
+                center,
+                val,
+                support,
+                density,
+                split,
+                linewidth=self.linewidth * .5,
+            )
 
     def draw_to_density(self, ax, center, val, support, density, split, **kws):
         """Draw a line orthogonal to the value axis at width of density."""
@@ -640,18 +752,47 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
             ax.invert_yaxis()
 
 
-
-def stripplot(x=None, y=None, hue=None, data=None, order=None, hue_order=None,
-              jitter=True, dodge=False, orient=None, color=None, palette=None, move = 0,
-              size=5, edgecolor="gray", linewidth=0, ax=None, width=.8, **kwargs):
+def stripplot(
+    x=None,
+    y=None,
+    hue=None,
+    data=None,
+    order=None,
+    hue_order=None,
+    jitter=True,
+    dodge=False,
+    orient=None,
+    color=None,
+    palette=None,
+    move=0,
+    size=5,
+    edgecolor="gray",
+    linewidth=0,
+    ax=None,
+    width=.8,
+    **kwargs
+):
 
     if "split" in kwargs:
         dodge = kwargs.pop("split")
         msg = "The `split` parameter has been renamed to `dodge`."
         warnings.warn(msg, UserWarning)
 
-    plotter = _StripPlotter(x, y, hue, data, order, hue_order,
-                            jitter, dodge, orient, color, palette, width, move)
+    plotter = _StripPlotter(
+        x,
+        y,
+        hue,
+        data,
+        order,
+        hue_order,
+        jitter,
+        dodge,
+        orient,
+        color,
+        palette,
+        width,
+        move,
+    )
     if ax is None:
         ax = plt.gca()
 
@@ -661,28 +802,61 @@ def stripplot(x=None, y=None, hue=None, data=None, order=None, hue_order=None,
         linewidth = size / 10
     if edgecolor == "gray":
         edgecolor = plotter.gray
-    kwargs.update(dict(s=size ** 2,
-                       edgecolor=edgecolor,
-                       linewidth=linewidth))
+    kwargs.update(dict(s=size ** 2, edgecolor=edgecolor, linewidth=linewidth))
 
     plotter.plot(ax, kwargs)
     return ax
 
 
+def half_violinplot(
+    x=None,
+    y=None,
+    hue=None,
+    data=None,
+    order=None,
+    hue_order=None,
+    bw="scott",
+    cut=2,
+    scale="area",
+    scale_hue=True,
+    gridsize=100,
+    width=.8,
+    inner="box",
+    split=False,
+    dodge=True,
+    orient=None,
+    linewidth=None,
+    color=None,
+    palette=None,
+    saturation=.75,
+    ax=None,
+    offset=.15,
+    **kwargs
+):
 
-
-
-
-def half_violinplot(x=None, y=None, hue=None, data=None, order=None, hue_order=None,
-               bw="scott", cut=2, scale="area", scale_hue=True, gridsize=100,
-               width=.8, inner="box", split=False, dodge=True, orient=None,
-               linewidth=None, color=None, palette=None, saturation=.75,
-               ax=None, offset=.15, **kwargs):
-
-    plotter = _Half_ViolinPlotter(x, y, hue, data, order, hue_order,
-                             bw, cut, scale, scale_hue, gridsize,
-                             width, inner, split, dodge, orient, linewidth,
-                             color, palette, saturation, offset)
+    plotter = _Half_ViolinPlotter(
+        x,
+        y,
+        hue,
+        data,
+        order,
+        hue_order,
+        bw,
+        cut,
+        scale,
+        scale_hue,
+        gridsize,
+        width,
+        inner,
+        split,
+        dodge,
+        orient,
+        linewidth,
+        color,
+        palette,
+        saturation,
+        offset,
+    )
 
     if ax is None:
         ax = plt.gca()
@@ -691,13 +865,30 @@ def half_violinplot(x=None, y=None, hue=None, data=None, order=None, hue_order=N
     return ax
 
 
-def RainCloud(x = None, y = None, hue = None, data = None,
-              orient = "v", width_viol = .7, width_box = .15,
-              palette = "Set2", bw = .2, linewidth = 1, cut = 0.,
-              scale = "area", jitter = 1, move = 0., offset = None,
-              color = None, ax = None, figsize = (12, 11),
-              pointplot = False, alpha = None, dodge = False):
-    '''Draw a Raincloud plot of measure `y` of different categories `x`. Here `x` and `y` different columns of the pandas dataframe `data`.
+def RainCloud(
+    x=None,
+    y=None,
+    hue=None,
+    data=None,
+    orient="v",
+    width_viol=.7,
+    width_box=.15,
+    palette="Set2",
+    bw=.2,
+    linewidth=1,
+    cut=0.,
+    scale="area",
+    jitter=1,
+    move=0.,
+    offset=None,
+    color=None,
+    ax=None,
+    figsize=(12, 11),
+    pointplot=False,
+    alpha=None,
+    dodge=False,
+):
+    """Draw a Raincloud plot of measure `y` of different categories `x`. Here `x` and `y` different columns of the pandas dataframe `data`.
     A raincloud is made of:
         1) "Cloud", kernel desity estimate, the half of a violinplot.
         2) "Rain", a stripplot below the cloud
@@ -713,65 +904,129 @@ def RainCloud(x = None, y = None, hue = None, data = None,
         width_box   width of the boxplot
         move        adjust rain position to the x-axis (default value 0.)
         offset      adjust cloud position to the x-axis
-    '''
+    """
 
-    if orient == 'h': #swap x and y
+    if orient == "h":  # swap x and y
         x, y = y, x
     if ax is None:
-        f, ax = plt.subplots(figsize = figsize)
+        f, ax = plt.subplots(figsize=figsize)
     if offset is None:
-        offset = max(width_box/1.8,.15) + .05
+        offset = max(width_box / 1.8, .15) + .05
     n_plots = 3
     split = False
     boxcolor = "black"
-    boxprops = {'facecolor':'none', "zorder":10}
+    boxprops = {"facecolor": "none", "zorder": 10}
     if not hue is None:
         split = True
         boxcolor = palette
-        boxprops = {"zorder":10}
+        boxprops = {"zorder": 10}
 
     # Draw half-violin
-    ax = half_violinplot(x = x, y = y, hue = hue, data = data, orient = orient, width = width_viol,
-                         inner = None, palette = palette, bw = bw,  linewidth = linewidth,
-                         cut = cut, scale = scale, split = split, offset = offset )
+    ax = half_violinplot(
+        x=x,
+        y=y,
+        hue=hue,
+        data=data,
+        orient=orient,
+        width=width_viol,
+        inner=None,
+        palette=palette,
+        bw=bw,
+        linewidth=linewidth,
+        cut=cut,
+        scale=scale,
+        split=split,
+        offset=offset,
+    )
 
     # Draw boxplot
-    ax =  sns.boxplot   (x = x, y = y, hue = hue, data = data, orient = orient, width = width_box, \
-                color = boxcolor, showcaps = True, boxprops = boxprops, palette = palette,\
-                showfliers = True, whiskerprops = {'linewidth':2, "zorder":10}, saturation = 1, dodge = dodge)
+    ax = sns.boxplot(
+        x=x,
+        y=y,
+        hue=hue,
+        data=data,
+        orient=orient,
+        width=width_box,
+        color=boxcolor,
+        showcaps=True,
+        boxprops=boxprops,
+        palette=palette,
+        showfliers=True,
+        whiskerprops={"linewidth": 2, "zorder": 10},
+        saturation=1,
+        dodge=dodge,
+    )
 
     # Set alpha of the two
     if not alpha is None:
-        _ = plt.setp(ax.collections + ax.artists, alpha = alpha)
+        _ = plt.setp(ax.collections + ax.artists, alpha=alpha)
 
     # Draw stripplot
-    ax =  stripplot (x = x, y = y, hue = hue, data = data, orient = orient, palette = palette, move = move, \
-                         edgecolor = "white", size = 3, jitter = jitter, zorder = 0, dodge = dodge, width = width_box )
+    ax = stripplot(
+        x=x,
+        y=y,
+        hue=hue,
+        data=data,
+        orient=orient,
+        palette=palette,
+        move=move,
+        edgecolor="white",
+        size=3,
+        jitter=jitter,
+        zorder=0,
+        dodge=dodge,
+        width=width_box,
+    )
     # Add pointplot
     if pointplot:
         n_plots = 4
         if not hue is None:
-            ax = sns.pointplot(x = x, y = y, hue = hue, data = data, orient=orient, \
-                          dodge = width_box/2., capsize = 0., errwidth = 0., palette = palette, zorder = 20)
+            ax = sns.pointplot(
+                x=x,
+                y=y,
+                hue=hue,
+                data=data,
+                orient=orient,
+                dodge=width_box / 2.,
+                capsize=0.,
+                errwidth=0.,
+                palette=palette,
+                zorder=20,
+            )
         else:
-            ax = sns.pointplot(x = x, y = y, hue = hue, data = data, color='red', orient=orient, \
-                          dodge = width_box/2., capsize = 0., errwidth = 0., zorder = 20)
+            ax = sns.pointplot(
+                x=x,
+                y=y,
+                hue=hue,
+                data=data,
+                color="red",
+                orient=orient,
+                dodge=width_box / 2.,
+                capsize=0.,
+                errwidth=0.,
+                zorder=20,
+            )
 
     # Prune the legend, add legend title
     if not hue is None:
         handles, labels = ax.get_legend_handles_labels()
-        _ = plt.legend(handles[0:len(labels)//n_plots], labels[0:len(labels)//n_plots], \
-                       bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., \
-                       title = str(hue))#, title_fontsize = 25)
+        _ = plt.legend(
+            handles[0 : len(labels) // n_plots],
+            labels[0 : len(labels) // n_plots],
+            bbox_to_anchor=(1.05, 1),
+            loc=2,
+            borderaxespad=0.,
+            title=str(hue),
+        )  # , title_fontsize = 25)
 
     # Adjust the ylim to fit (if needed)
     if orient == "h":
         ylim = list(ax.get_ylim())
-        ylim[-1]  -= (width_box + width_viol)/4.
+        ylim[-1] -= (width_box + width_viol) / 4.
         _ = ax.set_ylim(ylim)
     elif orient == "v":
         xlim = list(ax.get_xlim())
-        xlim[-1]  -= (width_box + width_viol)/4.
+        xlim[-1] -= (width_box + width_viol) / 4.
         _ = ax.set_xlim(xlim)
 
     return ax
