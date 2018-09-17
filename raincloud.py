@@ -13,7 +13,7 @@ from seaborn.utils import iqr, remove_na
 from seaborn.categorical import *
 from seaborn.categorical import _CategoricalPlotter, _CategoricalScatterPlotter
 
-__all__ = ["half_violinplot", "stripplot", "RainCloud"]
+__all__ = ["half_violinplot", "stripplot", "distplot"]
 
 
 class _StripPlotter(_CategoricalScatterPlotter):
@@ -867,7 +867,7 @@ def half_violinplot(
     return ax
 
 
-def plot_dist(
+def distplot(
     x=None,
     y=None,
     hue=None,
