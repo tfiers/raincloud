@@ -1,8 +1,10 @@
 from __future__ import division
 
 import warnings
+from typing import Callable
 
 import numpy as np
+from parachute import either
 from scipy import stats
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -769,7 +771,7 @@ def stripplot(
     edgecolor="gray",
     linewidth=0,
     ax=None,
-    width=.8,
+    width=0.8,
     **kwargs
 ):
 
@@ -820,7 +822,7 @@ def half_violinplot(
     scale="area",
     scale_hue=True,
     gridsize=100,
-    width=.8,
+    width=0.8,
     inner="box",
     split=False,
     dodge=True,
@@ -828,9 +830,9 @@ def half_violinplot(
     linewidth=None,
     color=None,
     palette=None,
-    saturation=.75,
+    saturation=0.75,
     ax=None,
-    offset=.15,
+    offset=0.15,
     **kwargs
 ):
 
@@ -865,16 +867,17 @@ def half_violinplot(
     return ax
 
 
-def RainCloud(
+def plot_dist(
     x=None,
     y=None,
     hue=None,
     data=None,
     orient="h",
-    width_viol=.7,
-    width_box=.15,
+    width_viol=0.7,
+    width_box=0.15,
     palette="Set2",
-    bw=.2,
+    bw: either("scott", "silverman", float, Callable) = 0.2,
+    #   The `bw_method` argument of scipy.stats.gaussian_kde
     linewidth=1,
     cut=0.,
     scale="area",
@@ -889,16 +892,23 @@ def RainCloud(
     dodge=False,
     showfliers=False,
 ):
-    """Draw a Raincloud plot of measure `y` of different categories `x`. Here `x` and `y` different columns of the pandas dataframe `data`.
+    """Draw a Raincloud plot of measure `y` of different categories `x`. Here
+    `x` and `y` different columns of the pandas dataframe `data`.
+
     A raincloud is made of:
         1) "Cloud", kernel desity estimate, the half of a violinplot.
         2) "Rain", a stripplot below the cloud
         3) "Umberella", a boxplot
-        4) "Thunder", a pointplot connecting the mean of the different categories (if `pointplot` is `True`)
+        4) "Thunder", a pointplot connecting the mean of the different
+            categories (if `pointplot` is `True`)
+
     Main inputs:
-        x           categorical data. Iterable, np.array, or dataframe column name if 'data' is specified
-        y           measure data. Iterable, np.array, or dataframe column name if 'data' is specified
-        hue         second categorical data. Use it to obtain different clouds and rainpoints
+        x           categorical data. Iterable, np.array, or dataframe column
+                    name if 'data' is specified
+        y           measure data. Iterable, np.array, or dataframe column name
+                    if 'data' is specified
+        hue         second categorical data. Use it to obtain different clouds
+                    and rainpoints
         data        input pandas dataframe
         orient      vertical if "v" (default), horizontal if "h"
         width_viol  width of the cloud
