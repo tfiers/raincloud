@@ -870,7 +870,7 @@ def RainCloud(
     y=None,
     hue=None,
     data=None,
-    orient="v",
+    orient="h",
     width_viol=.7,
     width_box=.15,
     palette="Set2",
@@ -883,10 +883,11 @@ def RainCloud(
     offset=None,
     color=None,
     ax=None,
-    figsize=(12, 11),
+    figsize=(10, 4),
     pointplot=False,
     alpha=None,
     dodge=False,
+    showfliers=False,
 ):
     """Draw a Raincloud plot of measure `y` of different categories `x`. Here `x` and `y` different columns of the pandas dataframe `data`.
     A raincloud is made of:
@@ -921,7 +922,6 @@ def RainCloud(
         boxcolor = palette
         boxprops = {"zorder": 10}
 
-    # Draw half-violin
     ax = half_violinplot(
         x=x,
         y=y,
@@ -939,7 +939,6 @@ def RainCloud(
         offset=offset,
     )
 
-    # Draw boxplot
     ax = sns.boxplot(
         x=x,
         y=y,
@@ -951,7 +950,7 @@ def RainCloud(
         showcaps=True,
         boxprops=boxprops,
         palette=palette,
-        showfliers=True,
+        showfliers=showfliers,
         whiskerprops={"linewidth": 2, "zorder": 10},
         saturation=1,
         dodge=dodge,
@@ -961,7 +960,6 @@ def RainCloud(
     if not alpha is None:
         _ = plt.setp(ax.collections + ax.artists, alpha=alpha)
 
-    # Draw stripplot
     ax = stripplot(
         x=x,
         y=y,
@@ -977,7 +975,6 @@ def RainCloud(
         dodge=dodge,
         width=width_box,
     )
-    # Add pointplot
     if pointplot:
         n_plots = 4
         if not hue is None:
