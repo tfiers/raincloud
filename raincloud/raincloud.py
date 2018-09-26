@@ -1,5 +1,3 @@
-from __future__ import division
-
 import warnings
 from typing import Callable
 
@@ -10,7 +8,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 from seaborn.utils import iqr, remove_na
-from seaborn.categorical import *
 from seaborn.categorical import _CategoricalPlotter, _CategoricalScatterPlotter
 
 __all__ = ["half_violinplot", "stripplot", "distplot"]
@@ -821,7 +818,7 @@ def half_violinplot(
     cut=2,
     scale="area",
     scale_hue=True,
-    gridsize=100,
+    gridsize=500,
     width=0.8,
     inner="box",
     split=False,
@@ -874,7 +871,7 @@ def distplot(
     data=None,
     orient="h",
     width_viol=0.7,
-    width_box=0.15,
+    width_box=0.06,
     palette="Set2",
     bw: either("scott", "silverman", float, Callable) = 0.2,
     #   The `bw_method` argument of scipy.stats.gaussian_kde
@@ -907,6 +904,7 @@ def distplot(
                     name if 'data' is specified
         y           measure data. Iterable, np.array, or dataframe column name
                     if 'data' is specified
+        palette:    See https://seaborn.pydata.org/generated/seaborn.color_palette.html
         hue         second categorical data. Use it to obtain different clouds
                     and rainpoints
         data        input pandas dataframe
@@ -917,8 +915,6 @@ def distplot(
         offset      adjust cloud position to the x-axis
     """
 
-    if orient == "h":  # swap x and y
-        x, y = y, x
     if ax is None:
         f, ax = plt.subplots(figsize=figsize)
     if offset is None:
