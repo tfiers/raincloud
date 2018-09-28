@@ -1,8 +1,10 @@
 import warnings
+from logging import getLogger
 from typing import Callable, Union, Iterable, Tuple
 
 import numpy as np
 from matplotlib.axes import Axes
+from matplotlib.colors import to_rgba
 from pandas import DataFrame
 from scipy import stats
 import matplotlib as mpl
@@ -12,6 +14,8 @@ from seaborn.utils import iqr, remove_na
 from seaborn.categorical import _CategoricalPlotter, _CategoricalScatterPlotter
 
 __all__ = ["half_violinplot", "stripplot", "distplot"]
+
+log = getLogger(__name__)
 
 
 class _StripPlotter(_CategoricalScatterPlotter):
@@ -116,6 +120,7 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
         cut,
         scale,
         scale_hue,
+        alpha,
         gridsize,
         width,
         inner,
@@ -137,6 +142,7 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
         self.width = width
         self.dodge = dodge
         self.offset = offset
+        self.alpha = alpha
 
         if inner is not None:
             if not any(
@@ -385,7 +391,9 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
         fill_func = ax.fill_betweenx if self.orient == "v" else ax.fill_between
         for i, group_data in enumerate(self.plot_data):
 
-            kws = dict(edgecolor=self.gray, linewidth=self.linewidth)
+            kws = dict(
+                edgecolor=self.gray, linewidth=self.linewidth, alpha=self.alpha
+            )
 
             # Option 1: we have a single level of grouping
             # --------------------------------------------
@@ -412,7 +420,7 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
                     -self.offset + grid - density * self.dwidth,
                     -self.offset + grid,
                     facecolor=self.colors[i],
-                    **kws
+                    **kws,
                 )
 
                 # Draw the interior representation of the data
@@ -477,14 +485,14 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
                                 support,
                                 -self.offset + grid - density * self.dwidth,
                                 -self.offset + grid,
-                                **kws
+                                **kws,
                             )
                         else:
                             fill_func(
                                 support,
                                 -self.offset + grid - density * self.dwidth,
                                 -self.offset + grid,
-                                **kws
+                                **kws,
                             )
 
                         # Draw the interior representation of the data
@@ -544,7 +552,7 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
                             support,
                             -self.offset + grid - density * self.dwidth,
                             -self.offset + grid,
-                            **kws
+                            **kws,
                         )
 
                         # Draw the interior representation
@@ -770,7 +778,7 @@ def stripplot(
     linewidth=0,
     ax=None,
     width=0.8,
-    **kwargs
+    **kwargs,
 ):
 
     if "split" in kwargs:
@@ -819,6 +827,7 @@ def half_violinplot(
     cut=2,
     scale="area",
     scale_hue=True,
+    alpha=1,
     gridsize=500,
     width=0.8,
     inner="box",
@@ -831,7 +840,7 @@ def half_violinplot(
     saturation=0.75,
     ax=None,
     offset=0.15,
-    **kwargs
+    **kwargs,
 ):
 
     plotter = _Half_ViolinPlotter(
@@ -845,6 +854,7 @@ def half_violinplot(
         cut,
         scale,
         scale_hue,
+        alpha,
         gridsize,
         width,
         inner,
@@ -871,8 +881,8 @@ def distplot(
     hue=None,
     data: DataFrame = None,
     orient: str = "h",
-    width_viol: float = 0.7,
-    width_box: float = 0.06,
+    width_kde: float = 0.7,
+    width_box: float = 0.09,
     palette="Set2",
     bw: Union[str, float, Callable] = 0.2,
     linewidth: float = 1,
@@ -881,9 +891,11 @@ def distplot(
     jitter=1,
     move=0.,
     ms=3,
-    dot_alpha=1,
+    alpha_dot=1,
+    alpha_kde=0.8,
+    alpha_box=0.1,
+    box_edge_color="black",
     offset=None,
-    color=None,
     ax: Axes = None,
     figsize: Tuple[float, float] = (10, 4),
     pointplot: bool = False,
@@ -905,6 +917,8 @@ def distplot(
     orient: Vertical if "v" (default), horizontal if "h"
     ms: Dot size for the strip-plots (i.e. the scatterplots / jittered
         dotplots).
+    alpha_box: alpha of the face color of the main box of the boxplot.
+        Ignored when `hue` is not None.
     """
 
     if ax is None:
@@ -913,12 +927,14 @@ def distplot(
         offset = max(width_box / 1.8, .15) + .05
     n_plots = 3
     split = False
-    boxcolor = "black"
-    boxprops = {"facecolor": "none", "zorder": 10}
-    if not hue is None:
-        split = True
-        boxcolor = palette
-        boxprops = {"zorder": 10}
+
+    box_props = dict(zorder=10, edgecolor=box_edge_color)
+    box_palette = palette
+    if hue is None:
+        box_palette = None
+        box_props["facecolor"] = to_rgba(box_edge_color, alpha=alpha_box)
+    else:
+        box_palette = palette
 
     ax = half_violinplot(
         x=x,
@@ -926,7 +942,8 @@ def distplot(
         hue=hue,
         data=data,
         orient=orient,
-        width=width_viol,
+        width=width_kde,
+        alpha=alpha_kde,
         inner=None,
         palette=palette,
         bw=bw,
@@ -944,20 +961,18 @@ def distplot(
         data=data,
         orient=orient,
         width=width_box,
-        color=boxcolor,
         showcaps=True,
-        boxprops=boxprops,
-        palette=palette,
         showfliers=showfliers,
-        whiskerprops={"linewidth": 2, "zorder": 10},
+        palette=box_palette,
+        boxprops=box_props,
+        medianprops=dict(zorder=11, color=box_edge_color),
+        whiskerprops=dict(linewidth=2, zorder=10, color=box_edge_color),
+        capprops=dict(linewidth=2, zorder=10, color=box_edge_color),
         saturation=1,
         dodge=dodge,
     )
 
-    # Set alpha of the two
-    if not alpha is None:
-        _ = plt.setp(ax.collections + ax.artists, alpha=alpha)
-
+    # jittered dotplot / 1D scatterplot:
     ax = stripplot(
         x=x,
         y=y,
@@ -968,12 +983,13 @@ def distplot(
         move=move,
         edgecolor="white",
         size=ms,
-        alpha=dot_alpha,
+        alpha=alpha_dot,
         jitter=jitter,
-        zorder=0,
+        zorder=1,
         dodge=dodge,
         width=width_box,
     )
+
     if pointplot:
         n_plots = 4
         if not hue is None:
@@ -1018,11 +1034,14 @@ def distplot(
     # Adjust the ylim to fit (if needed)
     if orient == "h":
         ylim = list(ax.get_ylim())
-        ylim[-1] -= (width_box + width_viol) / 4.
+        ylim[-1] -= (width_box + width_kde) / 4.
         _ = ax.set_ylim(ylim)
     elif orient == "v":
         xlim = list(ax.get_xlim())
-        xlim[-1] -= (width_box + width_viol) / 4.
+        xlim[-1] -= (width_box + width_kde) / 4.
         _ = ax.set_xlim(xlim)
+
+    # Make sure grid is plotted _below_ the data.
+    ax.set_axisbelow(True)
 
     return ax
