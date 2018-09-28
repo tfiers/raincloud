@@ -1,6 +1,6 @@
 import warnings
 from logging import getLogger
-from typing import Callable, Union, Iterable, Tuple
+from typing import Callable, Union, Iterable, Tuple, Sequence
 
 import numpy as np
 from matplotlib.axes import Axes
@@ -882,26 +882,25 @@ def distplot(
     data: DataFrame = None,
     orient: str = "h",
     width_kde: float = 0.7,
-    width_box: float = 0.09,
-    palette="Set2",
+    width_box: float = 0.08,
+    palette: Union[None, str, Sequence] = "Set2",
     bw: Union[str, float, Callable] = 0.2,
     linewidth: float = 1,
     cut=0.,
     scale="area",
-    jitter=1,
-    move=0.,
-    ms=3,
-    alpha_dot=1,
-    alpha_kde=0.8,
-    alpha_box=0.1,
-    box_edge_color="black",
+    jitter: float = 1,
+    move: float = 0.,
+    ms: float = 3,
+    alpha_dot: float = 1,
+    alpha_kde: float = 0.8,
+    box_edge_color="#444444",
     offset=None,
     ax: Axes = None,
     figsize: Tuple[float, float] = (10, 4),
     pointplot: bool = False,
-    alpha=None,
-    dodge=False,
-    showfliers=False,
+    dodge: bool = False,
+    showfliers: bool = False,
+    showcaps: bool = True,
 ):
     """
     Plot distribution of the given data. `x`, `y`, `hue` and `data` as in
@@ -928,13 +927,14 @@ def distplot(
     n_plots = 3
     split = False
 
-    box_props = dict(zorder=10, edgecolor=box_edge_color)
-    box_palette = palette
     if hue is None:
         box_palette = None
-        box_props["facecolor"] = to_rgba(box_edge_color, alpha=alpha_box)
+        box_color = box_edge_color
+        box_fc = "none"  # transparent
     else:
         box_palette = palette
+        box_fc = None
+        box_color = None
 
     ax = half_violinplot(
         x=x,
@@ -961,15 +961,22 @@ def distplot(
         data=data,
         orient=orient,
         width=width_box,
-        showcaps=True,
+        showcaps=showcaps,
         showfliers=showfliers,
-        palette=box_palette,
-        boxprops=box_props,
-        medianprops=dict(zorder=11, color=box_edge_color),
-        whiskerprops=dict(linewidth=2, zorder=10, color=box_edge_color),
-        capprops=dict(linewidth=2, zorder=10, color=box_edge_color),
-        saturation=1,
         dodge=dodge,
+        color=box_color,
+        palette=box_palette,
+        saturation=1,
+        boxprops=dict(zorder=10, edgecolor=box_edge_color, facecolor=box_fc),
+        medianprops=dict(
+            zorder=11, color=box_edge_color, solid_capstyle="butt"
+        ),
+        whiskerprops=dict(
+            linewidth=2, zorder=10, color=box_edge_color, solid_capstyle="butt"
+        ),
+        capprops=dict(
+            linewidth=2, zorder=10, color=box_edge_color, solid_capstyle="butt"
+        ),
     )
 
     # jittered dotplot / 1D scatterplot:
