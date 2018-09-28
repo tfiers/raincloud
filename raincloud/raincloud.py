@@ -1,8 +1,9 @@
 import warnings
-from typing import Callable
+from typing import Callable, Union, Iterable, Tuple
 
 import numpy as np
-from parachute import either
+from matplotlib.axes import Axes
+from pandas import DataFrame
 from scipy import stats
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -865,54 +866,45 @@ def half_violinplot(
 
 
 def distplot(
-    x=None,
-    y=None,
+    x: Union[Iterable, np.ndarray, str] = None,
+    y: Union[Iterable, np.ndarray, str] = None,
     hue=None,
-    data=None,
-    orient="h",
-    width_viol=0.7,
-    width_box=0.06,
+    data: DataFrame = None,
+    orient: str = "h",
+    width_viol: float = 0.7,
+    width_box: float = 0.06,
     palette="Set2",
-    bw: either("scott", "silverman", float, Callable) = 0.2,
-    #   The `bw_method` argument of scipy.stats.gaussian_kde
-    linewidth=1,
+    bw: Union[str, float, Callable] = 0.2,
+    linewidth: float = 1,
     cut=0.,
     scale="area",
     jitter=1,
     move=0.,
+    ms=3,
+    dot_alpha=1,
     offset=None,
     color=None,
-    ax=None,
-    figsize=(10, 4),
-    pointplot=False,
+    ax: Axes = None,
+    figsize: Tuple[float, float] = (10, 4),
+    pointplot: bool = False,
     alpha=None,
     dodge=False,
     showfliers=False,
 ):
-    """Draw a Raincloud plot of measure `y` of different categories `x`. Here
-    `x` and `y` different columns of the pandas dataframe `data`.
+    """
+    Plot distribution of the given data. `x`, `y`, `hue` and `data` as in
+    standard Seaborn plots.
 
-    A raincloud is made of:
-        1) "Cloud", kernel desity estimate, the half of a violinplot.
-        2) "Rain", a stripplot below the cloud
-        3) "Umberella", a boxplot
-        4) "Thunder", a pointplot connecting the mean of the different
-            categories (if `pointplot` is `True`)
+    (Except that 'x' will always be the data on the horizontal axis).
 
-    Main inputs:
-        x           categorical data. Iterable, np.array, or dataframe column
-                    name if 'data' is specified
-        y           measure data. Iterable, np.array, or dataframe column name
-                    if 'data' is specified
-        palette:    See https://seaborn.pydata.org/generated/seaborn.color_palette.html
-        hue         second categorical data. Use it to obtain different clouds
-                    and rainpoints
-        data        input pandas dataframe
-        orient      vertical if "v" (default), horizontal if "h"
-        width_viol  width of the cloud
-        width_box   width of the boxplot
-        move        adjust rain position to the x-axis (default value 0.)
-        offset      adjust cloud position to the x-axis
+    palette: Plotting colours. See:
+        >> https://seaborn.pydata.org/generated/seaborn.color_palette.html
+    bw: Bandwidth of the kernel density estimates. Either "scott", "silverman",
+        a scalar, or a function. See `scipy.stats.gaussian_kde`
+    hue: Second category to split by.
+    orient: Vertical if "v" (default), horizontal if "h"
+    ms: Dot size for the strip-plots (i.e. the scatterplots / jittered
+        dotplots).
     """
 
     if ax is None:
@@ -975,7 +967,8 @@ def distplot(
         palette=palette,
         move=move,
         edgecolor="white",
-        size=3,
+        size=ms,
+        alpha=dot_alpha,
         jitter=jitter,
         zorder=0,
         dodge=dodge,
