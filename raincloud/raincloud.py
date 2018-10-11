@@ -901,7 +901,7 @@ def distplot(
     dodge: bool = False,
     showfliers: bool = False,
     showcaps: bool = True,
-):
+) -> Axes:
     """
     Plot distribution of the given data. `x`, `y`, `hue` and `data` as in
     standard Seaborn plots.
