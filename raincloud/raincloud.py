@@ -901,6 +901,9 @@ def distplot(
     dodge: bool = False,
     showfliers: bool = False,
     showcaps: bool = True,
+    boxplot: bool = True,
+    dotplot: bool = True,
+    kdeplot: bool = True,
 ) -> Axes:
     """
     Plot distribution of the given data. `x`, `y`, `hue` and `data` as in
@@ -936,66 +939,69 @@ def distplot(
         box_fc = None
         box_color = None
 
-    ax = half_violinplot(
-        x=x,
-        y=y,
-        hue=hue,
-        data=data,
-        orient=orient,
-        width=width_kde,
-        alpha=alpha_kde,
-        inner=None,
-        palette=palette,
-        bw=bw,
-        linewidth=linewidth,
-        cut=cut,
-        scale=scale,
-        split=split,
-        offset=offset,
-    )
+    if kdeplot:
+        ax = half_violinplot(
+            x=x,
+            y=y,
+            hue=hue,
+            data=data,
+            orient=orient,
+            width=width_kde,
+            alpha=alpha_kde,
+            inner=None,
+            palette=palette,
+            bw=bw,
+            linewidth=linewidth,
+            cut=cut,
+            scale=scale,
+            split=split,
+            offset=offset,
+        )
 
-    ax = sns.boxplot(
-        x=x,
-        y=y,
-        hue=hue,
-        data=data,
-        orient=orient,
-        width=width_box,
-        showcaps=showcaps,
-        showfliers=showfliers,
-        dodge=dodge,
-        color=box_color,
-        palette=box_palette,
-        saturation=1,
-        boxprops=dict(zorder=10, edgecolor=box_edge_color, facecolor=box_fc),
-        medianprops=dict(
-            zorder=11, color=box_edge_color, solid_capstyle="butt"
-        ),
-        whiskerprops=dict(
-            linewidth=2, zorder=10, color=box_edge_color, solid_capstyle="butt"
-        ),
-        capprops=dict(
-            linewidth=2, zorder=10, color=box_edge_color, solid_capstyle="butt"
-        ),
-    )
+    if boxplot:
+        ax = sns.boxplot(
+            x=x,
+            y=y,
+            hue=hue,
+            data=data,
+            orient=orient,
+            width=width_box,
+            showcaps=showcaps,
+            showfliers=showfliers,
+            dodge=dodge,
+            color=box_color,
+            palette=box_palette,
+            saturation=1,
+            boxprops=dict(zorder=10, edgecolor=box_edge_color, facecolor=box_fc),
+            medianprops=dict(
+                zorder=11, color=box_edge_color, solid_capstyle="butt"
+            ),
+            whiskerprops=dict(
+                linewidth=2, zorder=10, color=box_edge_color, solid_capstyle="butt"
+            ),
+            capprops=dict(
+                linewidth=2, zorder=10, color=box_edge_color, solid_capstyle="butt"
+            ),
+        )
 
     # jittered dotplot / 1D scatterplot:
-    ax = stripplot(
-        x=x,
-        y=y,
-        hue=hue,
-        data=data,
-        orient=orient,
-        palette=palette,
-        move=move,
-        edgecolor="white",
-        size=ms,
-        alpha=alpha_dot,
-        jitter=jitter,
-        zorder=1,
-        dodge=dodge,
-        width=width_box,
-    )
+    if dotplot:
+        ax = stripplot(
+            x=x,
+            y=y,
+            hue=hue,
+            data=data,
+            orient=orient,
+            palette=palette,
+            move=move,
+            edgecolor="white",
+            size=ms,
+            alpha=alpha_dot,
+            jitter=jitter,
+            zorder=1,
+            dodge=dodge,
+            width=width_box,
+        )
 
     if pointplot:
         n_plots = 4
