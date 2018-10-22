@@ -194,7 +194,7 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
                 # Handle special case of no data at this level
                 if kde_data.size == 0:
                     support.append(np.array([]))
-                    density.append(np.array([1.]))
+                    density.append(np.array([1.0]))
                     counts[i] = 0
                     max_density[i] = 0
                     continue
@@ -202,7 +202,7 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
                 # Handle special case of a single unique datapoint
                 elif np.unique(kde_data).size == 1:
                     support.append(np.unique(kde_data))
-                    density.append(np.array([1.]))
+                    density.append(np.array([1.0]))
                     counts[i] = 1
                     max_density[i] = 0
                     continue
@@ -229,7 +229,7 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
                     # Handle special case of no data at this category level
                     if not group_data.size:
                         support[i].append(np.array([]))
-                        density[i].append(np.array([1.]))
+                        density[i].append(np.array([1.0]))
                         counts[i, j] = 0
                         max_density[i, j] = 0
                         continue
@@ -243,7 +243,7 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
                     # Handle special case of no data at this level
                     if kde_data.size == 0:
                         support[i].append(np.array([]))
-                        density[i].append(np.array([1.]))
+                        density[i].append(np.array([1.0]))
                         counts[i, j] = 0
                         max_density[i, j] = 0
                         continue
@@ -251,7 +251,7 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
                     # Handle special case of a single unique datapoint
                     elif np.unique(kde_data).size == 1:
                         support[i].append(np.unique(kde_data))
-                        density[i].append(np.array([1.]))
+                        density[i].append(np.array([1.0]))
                         counts[i, j] = 1
                         max_density[i, j] = 0
                         continue
@@ -727,13 +727,13 @@ class _Half_ViolinPlotter(_CategoricalPlotter):
                 support,
                 density,
                 split,
-                linewidth=self.linewidth * .5,
+                linewidth=self.linewidth * 0.5,
             )
 
     def draw_to_density(self, ax, center, val, support, density, split, **kws):
         """Draw a line orthogonal to the value axis at width of density."""
         idx = np.argmin(np.abs(support - val))
-        width = self.dwidth * density[idx] * .99
+        width = self.dwidth * density[idx] * 0.99
 
         kws["color"] = self.gray
 
@@ -883,13 +883,13 @@ def distplot(
     orient: str = "h",
     width_kde: float = 0.7,
     width_box: float = 0.08,
-    palette: Union[None, str, Sequence] = "Set2",
+    palette: Union[None, str, Sequence] = None,
     bw: Union[str, float, Callable] = 0.2,
     linewidth: float = 1,
-    cut=0.,
+    cut=0.0,
     scale="area",
     jitter: float = 1,
-    move: float = 0.,
+    move: float = 0.0,
     ms: float = 3,
     alpha_dot: float = 1,
     alpha_kde: float = 0.8,
@@ -926,7 +926,7 @@ def distplot(
     if ax is None:
         f, ax = plt.subplots(figsize=figsize)
     if offset is None:
-        offset = max(width_box / 1.8, .15) + .05
+        offset = max(width_box / 1.8, 0.15) + 0.05
     n_plots = 3
     split = False
 
@@ -972,15 +972,23 @@ def distplot(
             color=box_color,
             palette=box_palette,
             saturation=1,
-            boxprops=dict(zorder=10, edgecolor=box_edge_color, facecolor=box_fc),
+            boxprops=dict(
+                zorder=10, edgecolor=box_edge_color, facecolor=box_fc
+            ),
             medianprops=dict(
                 zorder=11, color=box_edge_color, solid_capstyle="butt"
             ),
             whiskerprops=dict(
-                linewidth=2, zorder=10, color=box_edge_color, solid_capstyle="butt"
+                linewidth=2,
+                zorder=10,
+                color=box_edge_color,
+                solid_capstyle="butt",
             ),
             capprops=dict(
-                linewidth=2, zorder=10, color=box_edge_color, solid_capstyle="butt"
+                linewidth=2,
+                zorder=10,
+                color=box_edge_color,
+                solid_capstyle="butt",
             ),
         )
 
@@ -1012,9 +1020,9 @@ def distplot(
                 hue=hue,
                 data=data,
                 orient=orient,
-                dodge=width_box / 2.,
-                capsize=0.,
-                errwidth=0.,
+                dodge=width_box / 2.0,
+                capsize=0.0,
+                errwidth=0.0,
                 palette=palette,
                 zorder=20,
             )
@@ -1026,9 +1034,9 @@ def distplot(
                 data=data,
                 color="red",
                 orient=orient,
-                dodge=width_box / 2.,
-                capsize=0.,
-                errwidth=0.,
+                dodge=width_box / 2.0,
+                capsize=0.0,
+                errwidth=0.0,
                 zorder=20,
             )
 
@@ -1040,18 +1048,18 @@ def distplot(
             labels[0 : len(labels) // n_plots],
             bbox_to_anchor=(1.05, 1),
             loc=2,
-            borderaxespad=0.,
+            borderaxespad=0.0,
             title=str(hue),
         )  # , title_fontsize = 25)
 
     # Adjust the ylim to fit (if needed)
     if orient == "h":
         ylim = list(ax.get_ylim())
-        ylim[-1] -= (width_box + width_kde) / 4.
+        ylim[-1] -= (width_box + width_kde) / 4.0
         _ = ax.set_ylim(ylim)
     elif orient == "v":
         xlim = list(ax.get_xlim())
-        xlim[-1] -= (width_box + width_kde) / 4.
+        xlim[-1] -= (width_box + width_kde) / 4.0
         _ = ax.set_xlim(xlim)
 
     # Make sure grid is plotted _below_ the data.
