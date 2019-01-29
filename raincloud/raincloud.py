@@ -880,6 +880,8 @@ def distplot(
     y: Union[Iterable, np.ndarray, str] = None,
     hue=None,
     data: DataFrame = None,
+    order: Sequence[str] = None,
+    hue_order: Sequence[str] = None,
     orient: str = "h",
     width_kde: float = 0.7,
     width_box: float = 0.08,
@@ -956,6 +958,9 @@ def distplot(
             scale=scale,
             split=split,
             offset=offset,
+            ax=ax,
+            order=order,
+            hue_order=hue_order,
         )
 
     if boxplot:
@@ -990,6 +995,9 @@ def distplot(
                 color=box_edge_color,
                 solid_capstyle="butt",
             ),
+            ax=ax,
+            order=order,
+            hue_order=hue_order,
         )
 
     # jittered dotplot / 1D scatterplot:
@@ -1009,6 +1017,9 @@ def distplot(
             zorder=1,
             dodge=dodge,
             width=width_box,
+            ax=ax,
+            order=order,
+            hue_order=hue_order,
         )
 
     if pointplot:
@@ -1025,6 +1036,9 @@ def distplot(
                 errwidth=0.0,
                 palette=palette,
                 zorder=20,
+                ax=ax,
+                order=order,
+                hue_order=hue_order,
             )
         else:
             ax = sns.pointplot(
@@ -1038,6 +1052,9 @@ def distplot(
                 capsize=0.0,
                 errwidth=0.0,
                 zorder=20,
+                ax=ax,
+                order=order,
+                hue_order=hue_order,
             )
 
     # Prune the legend, add legend title
